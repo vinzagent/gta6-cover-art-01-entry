@@ -1,12 +1,210 @@
-html, body { margin: 0; height: 100%; background: #f2f0f4; color: #1d1b22; font: 15px/1.4 system-ui, sans-serif; }
-.app { display: flex; gap: 32px; align-items: center; justify-content: center; height: 100%; padding: 24px; box-sizing: border-box; }
-.controls { display: flex; flex-direction: column; gap: 14px; width: 280px; }
-.controls h1 { margin: 0; font-size: 28px; }
-.controls p { margin: 0; color: #5c5866; }
-label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; }
-input[type=text] { font: inherit; padding: 8px; border: 1px solid #c9c4d1; border-radius: 6px; }
-button { font: inherit; font-weight: 700; padding: 10px; border: 0; border-radius: 6px; background: #1d1b22; color: #fff; cursor: pointer; }
-canvas { width: min(70vh, 60vw); height: min(70vh, 60vw); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2); }
-body.shot-cover .controls { display: none; }
-body.shot-cover .app { padding: 0; }
-body.shot-cover canvas { width: 100vw; height: 100vh; box-shadow: none; }
+@font-face {
+  font-family: 'Anton';
+  src: url('./fonts/Anton-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Archivo Black';
+  src: url('./fonts/ArchivoBlack-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: #14091f;
+  color: #f5eefc;
+  font: 15px/1.45 system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 18px 28px;
+  background: linear-gradient(90deg, #ff7a1a, #ff2e88 55%, #7b2ff7);
+  color: #fff;
+}
+.topbar h1 {
+  margin: 0;
+  font-family: 'Anton', 'Arial Black', sans-serif;
+  font-size: 34px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.topbar h1 span { color: #ffd23f; }
+.topbar p { margin: 6px 0 0; opacity: 0.92; }
+.top-badge {
+  flex: none;
+  padding: 10px 16px;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.studio {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 28px 40px;
+}
+.controls {
+  width: 340px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.group {
+  background: #221130;
+  border: 1px solid #3d2354;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.group h2 {
+  margin: 0;
+  font-family: 'Anton', 'Arial Black', sans-serif;
+  font-size: 17px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #ffd23f;
+}
+.group label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; }
+.group input[type=text] {
+  font: inherit;
+  padding: 9px 10px;
+  border: 1px solid #5a3a78;
+  border-radius: 8px;
+  background: #170a24;
+  color: #fff;
+}
+.group input[type=text]:focus { outline: 2px solid #ff2e88; }
+.group input[type=range] { width: 100%; accent-color: #ff2e88; }
+.upload-btn {
+  display: block;
+  text-align: center;
+  padding: 12px;
+  border-radius: 8px;
+  background: #ff2e88;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.upload-btn input { display: none; }
+.row { display: flex; gap: 8px; }
+.row .mini { flex: 1; }
+button.mini {
+  font: inherit;
+  font-weight: 700;
+  padding: 9px 10px;
+  border: 1px solid #5a3a78;
+  border-radius: 8px;
+  background: #2c1740;
+  color: #f5eefc;
+  cursor: pointer;
+}
+button.mini:disabled { opacity: 0.4; cursor: default; }
+button.mini:hover:not(:disabled) { border-color: #ff2e88; }
+.note { margin: 0; font-size: 13px; color: #c9b3de; }
+.note strong { color: #fff; }
+.tray { display: flex; gap: 8px; flex-wrap: wrap; min-height: 8px; }
+.thumb {
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 2px solid #5a3a78;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #170a24;
+  cursor: pointer;
+}
+.thumb:hover { border-color: #ffd23f; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.picker { display: flex; flex-direction: column; gap: 8px; }
+.pick {
+  text-align: left;
+  font: inherit;
+  padding: 9px 12px;
+  border: 1px solid #5a3a78;
+  border-radius: 8px;
+  background: #170a24;
+  color: #f5eefc;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.pick strong { font-size: 14px; }
+.pick span { font-size: 12px; color: #c9b3de; }
+.pick.on { border-color: #ffd23f; background: #33204a; box-shadow: 0 0 0 1px #ffd23f; }
+.swatches { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.swatch {
+  height: 54px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+.swatch span {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 3px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+  text-align: center;
+}
+.swatch.on { border-color: #fff; box-shadow: 0 0 0 2px #ffd23f; }
+.export-btn {
+  font: inherit;
+  font-weight: 800;
+  font-size: 17px;
+  padding: 13px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #ff7a1a, #ff2e88);
+  color: #fff;
+  cursor: pointer;
+}
+.export-btn:hover { filter: brightness(1.1); }
+#status { margin: 0; font-size: 13px; color: #ffd23f; min-height: 19px; }
+.stage { flex: 1; max-width: 920px; text-align: center; }
+#preview {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 12px 44px rgba(0, 0, 0, 0.55);
+  cursor: crosshair;
+  touch-action: none;
+}
+.hint { color: #c9b3de; font-size: 13px; }
+
+/* Screenshot scenes: cover alone fills the viewport; editor keeps the UI. */
+body.shot-cover .topbar,
+body.shot-cover .controls,
+body.shot-cover .hint { display: none; }
+body.shot-cover { background: #000; }
+body.shot-cover .studio { padding: 0; display: block; }
+body.shot-cover .stage { max-width: none; }
+body.shot-cover #preview {
+  width: 100vw;
+  height: 100vh;
+  object-fit: contain;
+  border-radius: 0;
+  box-shadow: none;
+  background: #000;
+}
+body.shot-editor .studio { align-items: flex-start; }

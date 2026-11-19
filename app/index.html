@@ -3,20 +3,80 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cover Snap</title>
+<title>Sunset State Cover Studio — GTA 6-style cover maker</title>
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-<main class="app">
-  <section class="controls">
-    <h1>Cover Snap</h1>
-    <p>A photo and a caption, made into a square cover.</p>
-    <label>Photo <input id="photo" type="file" accept="image/*"></label>
-    <label>Caption <input id="caption" type="text" maxlength="40" value="Sunset Heist"></label>
-    <button id="export" type="button">Export PNG 1080 x 1080</button>
-    <p id="status" role="status"></p>
+<header class="topbar">
+  <div>
+    <h1>Sunset State <span>Cover Studio</span></h1>
+    <p>Turn your photos into a multi-panel GTA-style poster cover. Upload, frame, grade, export.</p>
+  </div>
+  <div class="top-badge">6 layouts · 6 Vice grades · 3 export sizes</div>
+</header>
+<main class="studio">
+  <section class="controls" aria-label="Cover controls">
+    <div class="group">
+      <h2>1 · Photos</h2>
+      <label class="upload-btn">Upload your photos
+        <input id="upload" type="file" accept="image/*" multiple>
+      </label>
+      <div class="row">
+        <button id="sample-pier" type="button" class="mini">Sample: Pier sunset</button>
+        <button id="sample-boulevard" type="button" class="mini">Sample: Boulevard night</button>
+      </div>
+      <div id="photo-tray" class="tray" aria-label="Loaded photos"></div>
+      <p class="note">Click a thumbnail to put that photo in the selected panel. One photo can fill every panel, or each panel can have its own.</p>
+      <button id="fill-all" type="button" class="mini" disabled>Use this photo in all panels</button>
+    </div>
+
+    <div class="group">
+      <h2>2 · Caption</h2>
+      <label>Title
+        <input id="title" type="text" maxlength="28" value="Sunset Heist">
+      </label>
+      <label>Subtitle
+        <input id="subtitle" type="text" maxlength="60" value="One last ride down Ocean Drive">
+      </label>
+      <label>Tag
+        <input id="tag" type="text" maxlength="24" value="Sunset State">
+      </label>
+    </div>
+
+    <div class="group">
+      <h2>3 · Layout</h2>
+      <div id="layout-picker" class="picker"></div>
+    </div>
+
+    <div class="group">
+      <h2>4 · Vice grade</h2>
+      <div id="grade-picker" class="swatches"></div>
+    </div>
+
+    <div class="group">
+      <h2>5 · Selected panel</h2>
+      <p class="note"><strong id="panel-label">Panel 1 of 3</strong> · <span id="panel-photo">Photo: none yet</span></p>
+      <label>Zoom <span id="zoom-val">1.00×</span>
+        <input id="zoom" type="range" min="1" max="3" step="0.01" value="1">
+      </label>
+      <div class="row">
+        <button id="reset-panel" type="button" class="mini">Reset framing</button>
+      </div>
+      <p class="note">Tip: click any panel in the preview to select it, drag to move its photo, scroll to zoom.</p>
+    </div>
+
+    <div class="group">
+      <h2>6 · Export</h2>
+      <div id="size-picker" class="picker"></div>
+      <button id="export" type="button" class="export-btn">Export PNG</button>
+      <p id="status" role="status">Ready. Pick a photo to start.</p>
+    </div>
   </section>
-  <canvas id="cover" width="1080" height="1080" aria-label="The cover"></canvas>
+
+  <section class="stage" aria-label="Live preview">
+    <canvas id="preview" width="880" height="880" aria-label="Live cover preview"></canvas>
+    <p class="hint">Live preview — what you see is exactly what the PNG will be.</p>
+  </section>
 </main>
 <script type="module" src="./src/main.js"></script>
 </body>
