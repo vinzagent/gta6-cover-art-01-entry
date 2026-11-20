@@ -1,4 +1,5 @@
 // Sunset State Cover Studio — the handover for gta6-cover-art-01.
+// Version: v3.1 — re-encoded art.
 //
 // The app is this directory's app/ folder: plain static files a desktop
 // browser loads offline (app/index.html and its ES modules, no library

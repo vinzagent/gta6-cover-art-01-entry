@@ -5,6 +5,8 @@
 
 **Sunset State Cover Studio — 8 layouts, 6 Vice grades, Poster Ink, billing block & 3-size PNG export.** A GTA 6-style cover art maker that runs fully offline in the browser. Bring your own photos, frame each one inside a multi-panel poster, pick a Vice colour grade, finish it with a halftone Poster Ink print look, stamp it with a Vice City seal, run the credits along the bottom edge, set the caption in heavy extruded 3D lettering, and export a share-ready PNG.
 
+**Version:** v3.1 — re-encoded art.
+
 ## What you can make with it
 
 - **Any photo, any panel.** Upload photos from your own machine — or use the four AI-made samples: an Ocean Drive convertible, a Vice skyline sunset, a neon duo by a sports car, and a rainy getaway. Fill several panels with one photo or give each panel its own. Click a panel to select it, drag to move its photo, scroll or slide to zoom, and reframe every panel on its own.
