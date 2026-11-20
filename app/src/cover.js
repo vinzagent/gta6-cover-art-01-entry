@@ -1,11 +1,25 @@
-// Sunset State Cover Studio — the cover renderer.
+// Sunset State Cover Studio v2 — the cover renderer.
 // Draws a multi-panel GTA-style poster cover onto any 2D canvas context:
 // the user's photos fill the panels (each cropped and positioned on its own),
-// a Vice colour grade washes over everything, and the caption is set in
-// heavy extruded 3D lettering. All geometry is normalised (0..1) so the same
-// cover renders at 1080x1080, 1080x1350 and 1920x1080 without changes.
+// a Vice colour grade washes over everything, an optional Poster Ink finish
+// gives it the printed-poster look (halftone dots, ink vignette, extra
+// contrast), a seal stamps the corner, a billing block runs the credits
+// along the bottom edge, and the caption is set in heavy extruded 3D
+// lettering. All geometry is normalised (0..1) so the same cover renders
+// at 1080x1080, 1080x1350 and 1920x1080 without changes.
 
-/** The six panel layouts. `panels` are normalised rects; `slant` shears a
+/** The four AI-made sample photos shipped with the app, free to use.
+ *  Each one is a dramatic, cinematic Vice City scene with original
+ *  characters: a convertible on Ocean Drive, the skyline at sunset, a
+ *  criminal duo by a neon sports car, and a getaway on wet streets. */
+export const SAMPLES = [
+  { id: 'ocean-drive', name: 'Ocean Drive convertible', blurb: 'Classic convertible, neon sunset' },
+  { id: 'skyline', name: 'Vice skyline sunset', blurb: 'Palms, towers, burning sky' },
+  { id: 'duo', name: 'Neon duo', blurb: 'Two outlaws, one sports car' },
+  { id: 'getaway', name: 'Rainy getaway', blurb: 'Wet streets, red and blue lights' },
+];
+
+/** The eight panel layouts. `panels` are normalised rects; `slant` shears a
  *  panel's left and right edges for the comic-book diagonal look. `title`
  *  is the normalised band the caption lives in. */
 export const LAYOUTS = [
@@ -70,6 +84,29 @@ export const LAYOUTS = [
       { x: 0.675, y: 0, w: 0.325, h: 1 },
     ],
     title: { x: 0.04, y: 0.74, w: 0.92, h: 0.23, align: 'left' },
+  },
+  {
+    id: 'marquee',
+    name: 'Marquee Stack',
+    blurb: 'Big hero marquee on top, three strips below',
+    panels: [
+      { x: 0, y: 0, w: 1, h: 0.6 },
+      { x: 0, y: 0.615, w: 0.325, h: 0.385 },
+      { x: 0.3375, y: 0.615, w: 0.325, h: 0.385 },
+      { x: 0.675, y: 0.615, w: 0.325, h: 0.385 },
+    ],
+    title: { x: 0.04, y: 0.38, w: 0.92, h: 0.2, align: 'left' },
+  },
+  {
+    id: 'center',
+    name: 'Center Stage',
+    blurb: 'Tall centre panel flanked by two wings',
+    panels: [
+      { x: 0, y: 0, w: 0.26, h: 1 },
+      { x: 0.275, y: 0, w: 0.45, h: 1 },
+      { x: 0.74, y: 0, w: 0.26, h: 1 },
+    ],
+    title: { x: 0.03, y: 0.7, w: 0.94, h: 0.26, align: 'center' },
   },
 ];
 
@@ -171,6 +208,11 @@ export const SIZES = [
   { id: 'landscape', name: 'Landscape', w: 1920, h: 1080 },
 ];
 
+/** Default billing-block credits, editable in the studio. The names are
+ *  fictional stand-ins for the poster's cast, not real people. */
+export const DEFAULT_BILLING =
+  'SUNSET STATE PICTURES PRESENTS LUCIA VOSS AND JASON REYES IN "NEON GETAWAY" · A SUNSET STATE PRODUCTION · VICE CITY 2026';
+
 export function layoutById(id) {
   return LAYOUTS.find((l) => l.id === id) ?? LAYOUTS[0];
 }
@@ -181,6 +223,10 @@ export function gradeById(id) {
 
 export function sizeById(id) {
   return SIZES.find((s) => s.id === id) ?? SIZES[0];
+}
+
+export function sampleById(id) {
+  return SAMPLES.find((s) => s.id === id) ?? SAMPLES[0];
 }
 
 /** Builds the slanted panel path for one normalised panel rect. */
@@ -199,8 +245,10 @@ function panelPath(ctx, W, H, p) {
 }
 
 /** Paints one photo into one panel, cover-fitting it and applying the
- *  panel's own zoom and pan (ox/oy are fractions of the panel). */
-function paintPanelPhoto(ctx, W, H, panel, photo, grade) {
+ *  panel's own zoom and pan (ox/oy are fractions of the panel). With
+ *  Poster Ink on, the photo gets extra punch first, so the print finish
+ *  reads even before the halftone goes over it. */
+function paintPanelPhoto(ctx, W, H, panel, photo, grade, posterInk) {
   const px = panel.x * W;
   const py = panel.y * H;
   const pw = panel.w * W;
@@ -218,7 +266,7 @@ function paintPanelPhoto(ctx, W, H, panel, photo, grade) {
     const dh = ih * scale;
     const dx = px + (pw - dw) / 2 + (panel.ox ?? 0) * pw;
     const dy = py + (ph - dh) / 2 + (panel.oy ?? 0) * ph;
-    ctx.filter = grade.filter;
+    ctx.filter = posterInk ? `${grade.filter} contrast(1.22) saturate(1.35)` : grade.filter;
     ctx.drawImage(img, dx, dy, dw, dh);
     ctx.filter = 'none';
   } else {
@@ -229,6 +277,32 @@ function paintPanelPhoto(ctx, W, H, panel, photo, grade) {
     ctx.fillRect(px, py, pw, ph);
   }
   ctx.restore();
+}
+
+/** The Poster Ink finish: a halftone dot screen and a dark ink vignette
+ *  laid over the photos, so the cover reads like a printed poster. The
+ *  dots are drawn from a small pre-rendered tile, which keeps the pass
+ *  fast and deterministic at any export size. */
+function applyPosterInk(ctx, W, H) {
+  const step = Math.max(6, Math.round(W * 0.0065));
+  const tile = document.createElement('canvas');
+  tile.width = step;
+  tile.height = step;
+  const tctx = tile.getContext('2d');
+  tctx.fillStyle = 'rgba(0,0,0,0.16)';
+  tctx.beginPath();
+  tctx.arc(step / 2, step / 2, Math.max(0.8, step * 0.16), 0, Math.PI * 2);
+  tctx.fill();
+  const pattern = ctx.createPattern(tile, 'repeat');
+  ctx.save();
+  ctx.fillStyle = pattern;
+  ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+  const vig = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.42, W / 2, H / 2, Math.max(W, H) * 0.75);
+  vig.addColorStop(0, 'rgba(0,0,0,0)');
+  vig.addColorStop(1, 'rgba(10,0,20,0.34)');
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, 0, W, H);
 }
 
 /** Draws the caption in heavy extruded 3D lettering: a stack of offset
@@ -260,13 +334,83 @@ function drawExtrudedTitle(ctx, text, cx, baselineY, size, grade, align, maxWidt
   ctx.strokeText(text, cx, baselineY);
 }
 
+/** Draws a five-point star centred at (cx, cy) with outer radius r. */
+function drawStar(ctx, cx, cy, r) {
+  ctx.beginPath();
+  for (let i = 0; i < 10; i += 1) {
+    const angle = -Math.PI / 2 + (i * Math.PI) / 5;
+    const rad = i % 2 === 0 ? r : r * 0.42;
+    const x = cx + Math.cos(angle) * rad;
+    const y = cy + Math.sin(angle) * rad;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+
+/** The seal: a rotated circular stamp in the top-right corner — double
+ *  ring, a star, and two lines of text — like the stamp on a film poster. */
+function drawSeal(ctx, W, H, grade) {
+  const r = Math.max(26, W * 0.052);
+  const cx = W - r - W * 0.028;
+  const cy = r + H * 0.028;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(-0.21);
+  ctx.globalAlpha = 0.92;
+  ctx.lineWidth = Math.max(2, r * 0.045);
+  ctx.strokeStyle = grade.accent;
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.lineWidth = Math.max(1, r * 0.02);
+  ctx.beginPath();
+  ctx.arc(0, 0, r * 0.82, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.fillStyle = grade.accent;
+  drawStar(ctx, 0, -r * 0.34, r * 0.2);
+  ctx.font = `bold ${Math.max(9, r * 0.24)}px "Archivo Black", sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('VICE CITY', 0, r * 0.12);
+  ctx.font = `bold ${Math.max(8, r * 0.19)}px "Archivo Black", sans-serif`;
+  ctx.fillText('EST. 2026', 0, r * 0.44);
+  ctx.restore();
+}
+
+/** The billing block: a thin dark strip along the very bottom edge with
+ *  tiny condensed credits in white caps, like a movie poster's credit
+ *  line. The text shrinks until it fits the width. */
+function drawBillingBlock(ctx, W, H, billing) {
+  const text = (billing ?? '').trim().toUpperCase();
+  if (!text) return;
+  const stripH = Math.max(16, H * 0.026);
+  ctx.fillStyle = 'rgba(8,2,16,0.82)';
+  ctx.fillRect(0, H - stripH, W, stripH);
+  ctx.fillStyle = 'rgba(255,255,255,0.92)';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  let size = Math.max(9, W * 0.0115);
+  ctx.font = `bold ${size}px "Archivo Black", sans-serif`;
+  while (ctx.measureText(text).width > W * 0.96 && size > 7) {
+    size -= 0.5;
+    ctx.font = `bold ${size}px "Archivo Black", sans-serif`;
+  }
+  ctx.fillText(text, W / 2, H - stripH / 2 + 1);
+}
+
 /** Draws the whole cover. `state` carries layoutId, gradeId, title,
  *  subtitle, tag, photos (array of {img}) and panels (one per layout panel,
- *  each {photo, zoom, ox, oy} where photo is an index into photos). */
+ *  each {photo, zoom, ox, oy} where photo is an index into photos), plus
+ *  the v2 finish options: posterInk, seal, billing and showBilling. */
 export function drawCoverArt(ctx, W, H, state) {
   const layout = layoutById(state.layoutId);
   const grade = gradeById(state.gradeId);
   const panels = state.panels ?? [];
+  const posterInk = state.posterInk === true;
+  const showSeal = state.seal !== false;
+  const showBilling = state.showBilling !== false;
 
   // Sky backdrop: the grade's sunset gradient fills every gutter.
   const sky = ctx.createLinearGradient(0, 0, 0, H);
@@ -280,7 +424,7 @@ export function drawCoverArt(ctx, W, H, state) {
   layout.panels.forEach((panel, i) => {
     const slot = panels[i] ?? { photo: 0, zoom: 1, ox: 0, oy: 0 };
     const photo = state.photos?.[slot.photo] ?? null;
-    paintPanelPhoto(ctx, W, H, panel, photo, grade);
+    paintPanelPhoto(ctx, W, H, panel, photo, grade, posterInk);
   });
 
   // White gutters: a crisp frame around every panel.
@@ -298,6 +442,9 @@ export function drawCoverArt(ctx, W, H, state) {
   wash.addColorStop(1, grade.wash[1]);
   ctx.fillStyle = wash;
   ctx.fillRect(0, 0, W, H);
+
+  // Poster Ink finish goes over the photos and wash, under the lettering.
+  if (posterInk) applyPosterInk(ctx, W, H);
 
   // Sun disc glowing behind the caption, low in the title band like a
   // setting sun sinking behind the lettering.
@@ -343,6 +490,9 @@ export function drawCoverArt(ctx, W, H, state) {
     ctx.textBaseline = 'alphabetic';
   }
 
+  // Seal in the top-right corner, opposite the tag pill.
+  if (showSeal) drawSeal(ctx, W, H, grade);
+
   // Title + subtitle in the title band.
   const title = (state.title ?? '').trim().toUpperCase();
   const align = t.align === 'center' ? 'center' : 'left';
@@ -361,10 +511,16 @@ export function drawCoverArt(ctx, W, H, state) {
     ctx.fillStyle = '#ffffff';
     ctx.shadowColor = 'rgba(0,0,0,0.65)';
     ctx.shadowBlur = subSize * 0.3;
-    const subY = (t.y + t.h * 0.9) * H;
+    // When the billing strip is on, lift the subtitle a touch so the two
+    // never crowd each other at the bottom edge.
+    const lift = showBilling ? 0.035 : 0;
+    const subY = (t.y + t.h * (0.9 - lift)) * H;
     ctx.fillText(subtitle.toUpperCase(), cx, subY);
     ctx.shadowBlur = 0;
   }
+
+  // Billing block along the bottom edge, last so it sits on top.
+  if (showBilling) drawBillingBlock(ctx, W, H, state.billing);
 }
 
 /** Finds which layout panel (index) contains normalised point (nx, ny),

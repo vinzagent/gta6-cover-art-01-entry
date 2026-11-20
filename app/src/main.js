@@ -1,10 +1,11 @@
-// Sunset State Cover Studio — the editor.
+// Sunset State Cover Studio v2 — the editor.
 // Wires the controls to the renderer: photo uploads and samples, per-panel
 // crop and position (click a panel, drag to pan, wheel or slider to zoom),
-// six layouts, six Vice grades, editable caption, and PNG export in the
-// three post sizes. Runs fully offline; photos never leave the machine.
+// eight layouts, six Vice grades, editable caption, the Poster Ink finish,
+// a seal stamp and an editable billing block, and PNG export in the three
+// post sizes. Runs fully offline; photos never leave the machine.
 
-import { LAYOUTS, GRADES, SIZES, drawCoverArt, layoutById, gradeById, sizeById, panelAt } from './cover.js';
+import { LAYOUTS, GRADES, SIZES, SAMPLES, DEFAULT_BILLING, drawCoverArt, layoutById, gradeById, sizeById, panelAt } from './cover.js';
 import { runShot } from './shots.js';
 
 const $ = (id) => document.getElementById(id);
@@ -17,9 +18,13 @@ const state = {
   layoutId: 'hero',
   gradeId: 'sunset',
   sizeId: 'square',
-  title: 'Sunset Heist',
+  title: 'Neon Getaway',
   subtitle: 'One last ride down Ocean Drive',
   tag: 'Sunset State',
+  posterInk: false,
+  seal: true,
+  billing: DEFAULT_BILLING,
+  showBilling: true,
   photos: [],
   panels: [],
   selected: 0,
@@ -68,14 +73,21 @@ function addPhoto(img, name) {
   return state.photos.length - 1;
 }
 
+/** Promise version of sample loading, for the fixed screenshot scenes:
+ *  resolves with the new photo's index once the image has decoded. */
+function loadSampleAsync(name) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(addPhoto(img, name));
+    img.onerror = () => reject(new Error(`Could not load the ${name} sample.`));
+    img.src = `samples/${name}.jpg`;
+  });
+}
+
 function loadSample(name) {
-  const img = new Image();
-  img.onload = () => {
-    addPhoto(img, name);
-    setStatus(`Loaded sample photo “${name}”. Click a panel, then drag to frame it.`);
-  };
-  img.onerror = () => setStatus(`Could not load the ${name} sample.`);
-  img.src = `samples/${name}.jpg`;
+  loadSampleAsync(name)
+    .then(() => setStatus(`Loaded sample photo “${name}”. Click a panel, then drag to frame it.`))
+    .catch(() => setStatus(`Could not load the ${name} sample.`));
 }
 
 function loadUpload(file) {
@@ -115,9 +127,20 @@ function renderPhotoTray() {
   $('fill-all').disabled = state.photos.length === 0;
 }
 
-/** Builds the layout and grade pickers from the renderer's own lists, so
- *  the UI can never drift from what the cover actually draws. */
+/** Builds the sample buttons, layout and grade pickers from the
+ *  renderer's own lists, so the UI can never drift from what the cover
+ *  actually draws. */
 function buildPickers() {
+  const sampleBox = $('sample-row');
+  SAMPLES.forEach((sample) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'mini';
+    button.textContent = `Sample: ${sample.name}`;
+    button.title = sample.blurb;
+    button.addEventListener('click', () => loadSample(sample.id));
+    sampleBox.appendChild(button);
+  });
   const layoutBox = $('layout-picker');
   LAYOUTS.forEach((layout) => {
     const button = document.createElement('button');
@@ -253,8 +276,6 @@ $('upload').addEventListener('change', (event) => {
   [...event.target.files].forEach(loadUpload);
   event.target.value = '';
 });
-$('sample-pier').addEventListener('click', () => loadSample('pier'));
-$('sample-boulevard').addEventListener('click', () => loadSample('boulevard'));
 $('fill-all').addEventListener('click', () => {
   const slot = state.panels[state.selected];
   if (!slot) return;
@@ -280,6 +301,22 @@ $('zoom').addEventListener('input', (event) => {
 $('title').addEventListener('input', (event) => { state.title = event.target.value; render(); });
 $('subtitle').addEventListener('input', (event) => { state.subtitle = event.target.value; render(); });
 $('tag').addEventListener('input', (event) => { state.tag = event.target.value; render(); });
+$('poster-ink').addEventListener('change', (event) => {
+  state.posterInk = event.target.checked;
+  render();
+  setStatus(state.posterInk ? 'Poster Ink finish on — halftone print look.' : 'Poster Ink finish off.');
+});
+$('seal').addEventListener('change', (event) => {
+  state.seal = event.target.checked;
+  render();
+  setStatus(state.seal ? 'Seal stamp on.' : 'Seal stamp off.');
+});
+$('billing').addEventListener('input', (event) => { state.billing = event.target.value; render(); });
+$('show-billing').addEventListener('change', (event) => {
+  state.showBilling = event.target.checked;
+  render();
+  setStatus(state.showBilling ? 'Billing block on.' : 'Billing block off.');
+});
 $('export').addEventListener('click', exportPng);
 
 // Boot: build the pickers, wait for the display fonts, then paint.
@@ -294,6 +331,7 @@ const shot = query.get('shot');
 if (shot) {
   runShot(shot, query, {
     loadSample,
+    loadSampleAsync,
     setState(patch) {
       Object.assign(state, patch);
       state.panels = freshPanels(state.layoutId);
@@ -304,13 +342,17 @@ if (shot) {
       $('title').value = state.title;
       $('subtitle').value = state.subtitle;
       $('tag').value = state.tag;
+      $('poster-ink').checked = state.posterInk;
+      $('seal').checked = state.seal;
+      $('billing').value = state.billing;
+      $('show-billing').checked = state.showBilling;
       render();
     },
     render,
   });
 } else {
   // A cover on first paint even before the maker picks a photo.
-  loadSample('pier');
+  loadSample('duo');
 }
 
 if (document.fonts?.ready) {

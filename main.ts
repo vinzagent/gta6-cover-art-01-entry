@@ -1,11 +1,12 @@
-// Sunset State Cover Studio — my build for gta6-cover-art-01: the app is this directory's app/ folder, plain
+// Sunset State Cover Studio v2 — my build for gta6-cover-art-01: the app is this directory's app/ folder, plain
 // static files a desktop browser loads offline (app/index.html and its ES modules, no library and no network
 // request), and the program hands it in. It copies app/ and screenshots/ from beside this file to /output and writes
 // /output/dossier.json, the summary the judge reads, with the vendored make.fun library. The app is a multi-panel
-// GTA-style cover maker: six layouts, six Vice colour grades, per-panel photo crop and position, extruded 3D
-// caption lettering, and PNG export at 1080x1080, 1080x1350 and 1920x1080. Its two sample photos (app/samples/)
-// were made for make.fun with an image model and are free to use; its fonts (app/fonts/) ship under the SIL Open
-// Font License. Run it and check it with the kit's `node cli/makefun.mjs check` before entering.
+// GTA-style cover maker: eight layouts, six Vice colour grades, per-panel photo crop and position, extruded 3D
+// caption lettering, a Poster Ink halftone finish, a Vice City seal stamp, an editable billing block, and PNG export
+// at 1080x1080, 1080x1350 and 1920x1080. Its four sample photos (app/samples/) were made for make.fun with an image
+// model and are free to use; its fonts (app/fonts/) ship under the SIL Open Font License. Run it and check it with
+// the kit's `node cli/makefun.mjs check` before entering.
 //
 // Serve it locally with `node serve.ts`, then open http://localhost:8080.
 // Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
@@ -24,13 +25,13 @@ const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 // dossier the gate would reject.
 const appIndex = join(here, 'app', 'index.html');
 if (!existsSync(appIndex)) {
-  throw new Error('Sunset State Cover Studio: app/index.html is missing — nothing to hand in.');
+  throw new Error('Sunset State Cover Studio v2: app/index.html is missing — nothing to hand in.');
 }
 const shots = existsSync(join(here, 'screenshots'))
   ? readdirSync(join(here, 'screenshots')).filter((f) => !f.startsWith('.'))
   : [];
 if (shots.length < 3 || shots.length > 4) {
-  throw new Error(`Sunset State Cover Studio: expected 3 or 4 screenshots, found ${shots.length}.`);
+  throw new Error(`Sunset State Cover Studio v2: expected 3 or 4 screenshots, found ${shots.length}.`);
 }
 
 mkdirSync(out, { recursive: true });

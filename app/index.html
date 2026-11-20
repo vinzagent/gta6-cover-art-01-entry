@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sunset State Cover Studio — GTA 6-style cover maker</title>
+<title>Sunset State Cover Studio v2 — GTA 6-style cover maker</title>
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 <header class="topbar">
   <div>
-    <h1>Sunset State <span>Cover Studio</span></h1>
-    <p>Turn your photos into a multi-panel GTA-style poster cover. Upload, frame, grade, export.</p>
+    <h1>Sunset State <span>Cover Studio v2</span></h1>
+    <p>Turn your photos into a multi-panel GTA-style poster cover. Upload, frame, grade, ink it, export.</p>
   </div>
-  <div class="top-badge">6 layouts · 6 Vice grades · 3 export sizes</div>
+  <div class="top-badge">8 layouts · 6 Vice grades · Poster Ink · billing block</div>
 </header>
 <main class="studio">
   <section class="controls" aria-label="Cover controls">
@@ -21,10 +21,7 @@
       <label class="upload-btn">Upload your photos
         <input id="upload" type="file" accept="image/*" multiple>
       </label>
-      <div class="row">
-        <button id="sample-pier" type="button" class="mini">Sample: Pier sunset</button>
-        <button id="sample-boulevard" type="button" class="mini">Sample: Boulevard night</button>
-      </div>
+      <div id="sample-row" class="samples"></div>
       <div id="photo-tray" class="tray" aria-label="Loaded photos"></div>
       <p class="note">Click a thumbnail to put that photo in the selected panel. One photo can fill every panel, or each panel can have its own.</p>
       <button id="fill-all" type="button" class="mini" disabled>Use this photo in all panels</button>
@@ -33,7 +30,7 @@
     <div class="group">
       <h2>2 · Caption</h2>
       <label>Title
-        <input id="title" type="text" maxlength="28" value="Sunset Heist">
+        <input id="title" type="text" maxlength="28" value="Neon Getaway">
       </label>
       <label>Subtitle
         <input id="subtitle" type="text" maxlength="60" value="One last ride down Ocean Drive">
@@ -66,7 +63,18 @@
     </div>
 
     <div class="group">
-      <h2>6 · Export</h2>
+      <h2>6 · Poster finish</h2>
+      <label class="check"><input id="poster-ink" type="checkbox"> Poster Ink — halftone print finish</label>
+      <label class="check"><input id="seal" type="checkbox" checked> Seal stamp — Vice City corner stamp</label>
+      <label class="check"><input id="show-billing" type="checkbox" checked> Billing block — credits strip</label>
+      <label>Billing credits
+        <input id="billing" type="text" maxlength="160" value="Sunset State Pictures presents Lucia Voss and Jason Reyes in &quot;Neon Getaway&quot; · A Sunset State production · Vice City 2026">
+      </label>
+      <p class="note">The billing block runs tiny credits along the bottom edge, like a movie poster. Edit it to name your own cast.</p>
+    </div>
+
+    <div class="group">
+      <h2>7 · Export</h2>
       <div id="size-picker" class="picker"></div>
       <button id="export" type="button" class="export-btn">Export PNG</button>
       <p id="status" role="status">Ready. Pick a photo to start.</p>

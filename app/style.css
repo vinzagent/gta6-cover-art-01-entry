@@ -90,6 +90,14 @@ body {
 }
 .group input[type=text]:focus { outline: 2px solid #ff2e88; }
 .group input[type=range] { width: 100%; accent-color: #ff2e88; }
+.group input[type=checkbox] { accent-color: #ff2e88; width: 16px; height: 16px; }
+label.check {
+  flex-direction: row;
+  align-items: center;
+  gap: 9px;
+  font-weight: 600;
+  cursor: pointer;
+}
 .upload-btn {
   display: block;
   text-align: center;
@@ -103,6 +111,8 @@ body {
 .upload-btn input { display: none; }
 .row { display: flex; gap: 8px; }
 .row .mini { flex: 1; }
+.samples { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.samples .mini { font-size: 13px; padding: 8px 6px; }
 button.mini {
   font: inherit;
   font-weight: 700;
