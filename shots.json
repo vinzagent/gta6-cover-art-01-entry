@@ -1,1 +1,26 @@
-[{"h":720,"name":"1-cover.jpg","query":"?shot=cover&photos=ocean-drive,duo,getaway,skyline&caption=Neon%20Getaway&layout=marquee&grade=neon&size=landscape&posterInk=1&seal=1&pan=0,0.3,0,0","w":1280},{"h":800,"name":"2-editor.jpg","query":"?shot=editor&photos=duo,skyline&caption=Neon%20Getaway&layout=hero&grade=sunset&size=landscape&posterInk=1&seal=1","w":1280},{"h":1280,"name":"3-cover-portrait.jpg","query":"?shot=cover&photos=duo,getaway,skyline&caption=Rain%20City%20Run&subtitle=No%20brakes%20after%20midnight&layout=hero&grade=teal&size=portrait&posterInk=1&seal=1","w":1024},{"h":1080,"name":"4-cover-square.jpg","query":"?shot=cover&photos=ocean-drive,skyline,duo&caption=Ocean%20Drive&subtitle=Cruise%20the%20neon%20coast&layout=center&grade=gold&size=square&seal=1","w":1080}]
+[
+  {
+    "name": "1-cover.jpg",
+    "w": 1280,
+    "h": 720,
+    "query": "?shot=cover&photos=ocean-drive,duo,getaway,skyline&caption=Neon%20Getaway&layout=marquee&grade=neon&size=landscape&posterInk=1&seal=1&pan=0,0.3,0,0"
+  },
+  {
+    "name": "2-editor.jpg",
+    "w": 1280,
+    "h": 800,
+    "query": "?shot=editor&photos=duo,skyline&caption=Neon%20Getaway&layout=hero&grade=sunset&size=landscape&posterInk=1&seal=1"
+  },
+  {
+    "name": "3-cover-portrait.jpg",
+    "w": 1024,
+    "h": 1280,
+    "query": "?shot=cover&photos=duo,getaway,skyline&caption=Rain%20City%20Run&subtitle=No%20brakes%20after%20midnight&layout=hero&grade=teal&size=portrait&posterInk=1&seal=1"
+  },
+  {
+    "name": "4-cover-square.jpg",
+    "w": 1080,
+    "h": 1080,
+    "query": "?shot=cover&photos=ocean-drive,skyline,duo&caption=Ocean%20Drive&subtitle=Cruise%20the%20neon%20coast&layout=center&grade=gold&size=square&seal=1"
+  }
+]

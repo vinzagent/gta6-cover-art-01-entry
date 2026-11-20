@@ -3,19 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sunset State Cover Studio v2 — GTA 6-style cover maker</title>
+<title>Sunset State Cover Studio — GTA 6-style cover maker</title>
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 <header class="topbar">
-  <div>
-    <h1>Sunset State <span>Cover Studio v2</span></h1>
-    <p>Turn your photos into a multi-panel GTA-style poster cover. Upload, frame, grade, ink it, export.</p>
+  <div class="topbar-copy">
+    <h1>Sunset State <span>Cover Studio</span></h1>
+    <p>Turn your photos into a multi-panel GTA-style poster cover — upload, frame, grade, ink it, export.</p>
   </div>
-  <div class="top-badge">8 layouts · 6 Vice grades · Poster Ink · billing block</div>
+  <p class="top-badge">8 layouts · 6 Vice grades · Poster Ink · billing block</p>
 </header>
+
 <main class="studio">
   <section class="controls" aria-label="Cover controls">
+
     <div class="group">
       <h2>1 · Photos</h2>
       <label class="upload-btn">Upload your photos
@@ -56,9 +58,7 @@
       <label>Zoom <span id="zoom-val">1.00×</span>
         <input id="zoom" type="range" min="1" max="3" step="0.01" value="1">
       </label>
-      <div class="row">
-        <button id="reset-panel" type="button" class="mini">Reset framing</button>
-      </div>
+      <button id="reset-panel" type="button" class="mini">Reset framing</button>
       <p class="note">Tip: click any panel in the preview to select it, drag to move its photo, scroll to zoom.</p>
     </div>
 
@@ -79,6 +79,7 @@
       <button id="export" type="button" class="export-btn">Export PNG</button>
       <p id="status" role="status">Ready. Pick a photo to start.</p>
     </div>
+
   </section>
 
   <section class="stage" aria-label="Live preview">
@@ -86,6 +87,7 @@
     <p class="hint">Live preview — what you see is exactly what the PNG will be.</p>
   </section>
 </main>
+
 <script type="module" src="./src/main.js"></script>
 </body>
 </html>
